@@ -10,30 +10,37 @@ echo 'Finished cloning'
 
 echo ""
 echo "------------------------------"
-file=`find student-submission -name "ListExamples.java"`
+submission="ListExamples.java"
+file="student-submission/$submission"
+
 if [[ -f $file ]]
 then
-    echo "FILE FOUND: ListExamples.java"
+    echo "FILE FOUND: $submission"
 else
-    echo "ERROR: FILE NOT FOUND: ListExamples.java"
-    echo "------------------------------"
-    exit 1
+    if [[ -f `find student-submission -name $submission` ]]
+    then
+        echo "FILE IN WRONG DIRECTORY: $submission"
+        echo "------------------------------"
+        exit 1
+    else
+        echo "ERROR: FILE NOT FOUND: $submission"
+        echo "------------------------------"
+        exit 1
+    fi
 fi
 
-cp TestListExamples.java grading-area
-cp $file grading-area
-
-# cd grading-area
 dir="grading-area"
+cp TestListExamples.java $dir
+cp $file $dir
+
 javac -cp $CPATH $dir/*.java > $dir/out.txt 2>&1
 if [[ $? != 0 ]]
 then
-    echo "COMPILE FAILURE: ListExamples.java"
-    cat $dir/out.txt
+    echo "COMPILE FAILURE: $submission"
     echo "------------------------------"
     exit 1
 fi
-echo "COMPILE SUCCESS: ListExamples.java"
+echo "COMPILE SUCCESS: $submission"
 java -cp "$dir;lib/hamcrest-core-1.3.jar;lib/junit-4.13.2.jar" org.junit.runner.JUnitCore TestListExamples > $dir/out2.txt 2>&1
 
 grep "Tests run" $dir/out2.txt > $dir/fails.txt
@@ -48,9 +55,3 @@ echo ""
 echo "Failed Tests: "
 cat $dir/methodfails.txt
 echo "------------------------------"
-
-# Draw a picture/take notes on the directory structure that's set up after
-# getting to this point
-
-# Then, add here code to compile and run, and do any post-processing of the
-# tests
